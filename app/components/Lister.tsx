@@ -1,4 +1,3 @@
-
 'use client'
 
 import { useState, useCallback, useRef } from 'react'
@@ -44,7 +43,7 @@ const TAG_SUGGESTIONS: Record<string, string[]> = {
   'Other': ['general', 'miscellaneous', 'accessory']
 }
 
-const UNIMART_LOGO_URI = "data:image/png;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/4gHYSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCIFhZWiAH4AABAAEAAAAAAABhY3NwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAA9tYAAQAAAADTLQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAACRyWFlaAAABFAAAABRnWFlaAAABKAAAABRiWFlaAAABPAAAABR3dHB0AAABUAAAABRyVFJDAAABZAAAAChnVFJDAAABZAAAAChiVFJDAAABZAAAAChjcHJ0AAABjAAAADxtbHVjAAAAAAAAAAEAAAAMZW5VUwAAAAgAAAAcAHMAUgBHAEJYWVogAAAAAAAAb6IAADj1AAADkFhZWiAAAAAAAABimQAAt4UAABjaWFlaIAAAAAAAACSgAAAPhAAAts9YWVogAAAAAAAA9tYAAQAAAADTLXBhcmEAAAAAAAQAAAACZmYAAPKnAAANWQAAE9AAAApbAAAAAAAAAABtbHVjAAAAAAAAAAEAAAAMZW5VUwAAACAAAAAcAEcAbwBvAGcAbABlACAASQBuAGMALgAgADIAMAAxADb/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwkMEQ8SEhEPERETFhwXExQaFRERGCEYGh0dHx8fExciJCIeJBweHx7/2wBDAQUFBQcGBw4ICA4eFBEUHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh7/wAARCAQABAADASIAAhEBAxEB/8QAHAABAQEAAwEBAQAAAAAAAAAAAQACAwcIBgQF/8QAVRAAAgECBAQEAAgICgcGBgMBAAERAiEDBDFBBQZRYQcScYEIEyKRobGysxQyN0JSc3TBFSMmJzZiY3J10RckQ1NkgpIWM1M1o8IlNERl0uE1k5Tw/9oADAMBAAIRAxEAPwD+VMspAZPMn6dTZSZm4kDJSCJso1JIzIrQiFO4yZm4yDDQBIkBoKJ6WAgZC5FsELYbkKQEhImQRFuWwRCg0F6EFNxbBSy1AhJERDsSBGloRGtEQSLIiKQkWRFNiTBMQNJjsZRp6ERdiMqZua2INdiD1LQMWp2F6AtRIgKRgHqQUkA6lEBXEghmwaEQbTIzJrawRSUhuOwQiANgbTEwnc0SWMtCZFGKNASdhgIgQ6MkEJEOoQbECHewCQGjFEtTexhGpsEkkgQhCmTCRCA0AmJJILbmmESIE7mgklMgNbkQiCIxQz3IFvYX9IEJakRiZAiSuBCi3IIRQCRGpsDAmQamxGUaYRI0Z3NvQkpKQgnsMEYm4EXqEanuRlkmQbBktRCJIRi47BiyaRlmqSElDJERimG5EAkRBSBFJEKNSZKQjaYJuQbJO4MPgtyKbkbC2pEREERAURpaBAohIRol3JhEUkUkQkWxMDO4otySIp1FIGIRMBJIIuwgMkRO5CTIJIoIloRC041Idh2BkKTUWYQJEHsTdrEVoIBO47wUXFMglqK1DuK9QjUagIEYqNzWwCtyIdyfQhAl1GQ2KSIidi3uM7ACHaTMNM0QlBAiET0M7mvQot0YRlaGkUCiCgYJIYCZEWB+hp6BaSAU6G13KLCtCTKTKgRRqIWhGOWVIvQdwb2CK71KS9C3ARS6hAxG9wxTBroN/cQM+gq1hgIIZJLUUTSkiKZFXIUiIYZIV9IEQlsRPQIScwCZrUhLKmxpaFECEkqxSBBC2MhqxVyIV3B3JGiCQghDEGgatLJsgTSgyhTDFpwBbCkQCFlBehESFaAyZQrU0jCNIkpLW4pmUx9CMSICiIXoDQ7FYIyaRPQURWkTMo0wxG5qmxm8mkEklIEzFCUggA1NgkBKGbBNyLcg0tCBO4kCS1Atyo+DWomUaRsDaUAsiCRMQfYB2FmTSCIGrGgepAIdyK+xBM0ZWpoJIFE+rHYDNhIiBWpAQQsTJpEQvQyIAK1HbuCSkaoIhTIFqU3CNSxQIYsYgeo+pblAEwgdtQIHsPqC1tuUhGpRbmbjtqRMNJqR3MXk0tbERvYgTIIXpqZQz7h6EG0W5JCyMRcYU9iLQC3FdzMwzQQ9iaC5td2JQJWYGzGpAqTQJQJEFX0AtYNAAxYfQkJESNLQPQtiIfQy9TVgerCBmlqBIg3sVXUJuUqblYkgWpoCCS7SSIiFlqiuyBVzW5UoURFsA7aBuRDqRBoEbUEZk0nYiSULkLi4CIUZGQEUG4oiHYloJayRjlTfUUEdBnUgtgfQU9i1ANDSCLCgjaDclYbmLE+hbgO4RBAoWDLC1NgICoCSLUI0uooFoUojFtNQALUSISJSJBOEWrKSQQrQV01ASImVxIIgYgwAQZAI+4FsAk3cJIg0RQKA+DQ2JFY2BtCZIWBBDIJkEDUCnAsywrSZAhetiIdgYkESItyILYQuIATItyC3sIIQJGjK6DsREOwBcSYaQwCfU0/UjEIfpM6IbkG1oNo1MoZIxT1Ey+pBSDmCm4dgFE5klddDSU2IJdxgIYqYJLFMUA2IhkupJCEQpFsSb0Ija0AJKSIQIWAQaZamlCQSQtBQx0M76kRoHrYU51JwEhTcm7hsSINIgQ31CH3HcBkjFpblGxn1EgmRLUgF6AtRGFuEGxbjoRBGpkyhQSSw3NBFwipNAkJEJGdzRJSSDG8A9SB0IhgCRINBkiS2ugCgfUjFpXRQClehqQShQCRi0jJpaA1cIk7CDViTuQRJ9SZIDSEFqJELYoBVwxJasBCEjMwJBSiAUEI7gIGnoZ3KQ/O1IkNGkC0uREaRPsRBEKVwuJEloiIiFC+4FJETDUSlijLBiRVKELyNiIiIURCkTmQED4RDsZQmwNoJepm5LUkhJlpYNQpnoFiJgImUxkiHQUBSBpWBCZbgIWwL3FaMKu4oHJXIh2IloNoIgWosiCJajAXkSSSl3IXqBEMXEFqNgKe4yQfSYoXEA4IgqeobmvUdLhMpDuBKSI0U9QU6F6kQyKQdxTsRGlHUTKGe4RWHcNUJESvIlBQEMDICRCuwrQzuK7ESW9jDjQZuyWoRPQGaKJIZZhm13Jg2QamwINxQRIS1sIQ6ikCG8kQlBDYiMiXUy9CjRGdzSIFdxgqR2IxlERWkgS2K0FsERMUIQrQzqzQbkQkiQkAREEaWmpPuRLW4RPUU7g3clJiNt2IFoIYtSSMimiJLTgNxTBhDOwWLeC0cEVpGoMml6hjLPqakgmwCWwDsRGhQCtwgeoCxYAMgK6hJMWBamtzLREbRSArUiFMgRoIQ3IiIZFOQ0dyQGkSBPoUkTBbLYBCBIUG5ALZFqiBCkUw2IgZFagjSKkvgxkymJ37aTYimxlkTBbINhQVO4iVgg6lcmJBFuRAKBlsIQQQuIKxBMkJARPoPoD9SIkIIUQW+hpB6lsETdy3IiI0QSPdgWpIVpoBBPQiFEFOgy4AQxKdyYP5im5BpWL0LYCIX6gO4AbpY7GUUkYtr1JGJZqbq4MNkyKTFimBpE7BMpfOJIiAZJjFyUBCmUkW5EapJ3In6kQooMps1YIUxXcFEkSUSNIPQQqXUZIAxL6GYNdxIMpG13CLsQSVYgLezIxaMkiIjauXZkmSd+5EO0lcupAMDuGxeoRSXsQSQTFFEjuEW4sgb6hFBpWYSIGkDBMTFEIbmkEkrQmAzJEwmWm4bivUDUjS7AS6ERpmRWhQIRK4sFqaEok3FhAUQLIpEMV3IBVwHYO4+oIiESQyRMkBLUIiki3sBAyEgkIrQgxKINyAhQCENgIiEJgTIitKzFEi3CPgx0RlCd+2hEAhUhQI0kEa7kCIIiIn3CIgbFEDACjLiQEmEhIXDXqaMo0uxiiRMfUGEA7yUkgNruECoDciJkRRuRDuKBdi0AWEI9TEQhuIQr5yegXgSIH84ou5LQB9RpA1T1kSknRhG5XHTUxYgjQQFUWIfUoCNDuZQkljJXYZvYC3IhIpHsQQoBQQ7EiGxEC6CZbsSYTDVhMiQw0hgyja0JKM6XNSRBCFiEiAUwi4wBr6wYSIRbEGzIgdx3DUfQIZHVhtAoiNbAmWm4q7CFOwxIRFiIiaIhIItxM7wENiLYUEQzYyaV0AL U2ggnpYkobCZFBCDk0ii5EQwS0IghTSC8BJEbkgTYogdRDYSsV3H3BDIRE25EHqQKNLsYTaZtNBjJAS3sYoiIgNAUXISiGwCAsimxIiFCCZBEyRIUQROC3B6hFJESCkBYLUgVJpGUaTvBEfCEiRSbC2gMiIi4OwoyhuEaACUBMHYH0ENAHVkQEGtiYbEwYDJkyuRTSbRhWNJklJaTJdzOwrQMSUCgIhehD2TLsRApKSICQskMAGw+hEpgkiEdogiIi3L1DqRDuSgtrhaQNq6FWRhHIiSkjc0Wj6l6kYrUn9JbETIt9TSMxuhXZhCSRIiIYkoFd9AqCKRuE37CQRpOxmxrYJJRETZGIbC0i9S3ClC9zIkSSvU2phGUpZtEljKIikCWo6lBLsEkkOwSRiIuBpxtqZ9AsNbE0BSQKsK9QNaoIhKe4oIvU0Z0HWSJLTZlu7KdgtJEKdhkOoNgbTL2MpiRMNmXYE5II0yQCgNIQQoxRJaloK7g41CIZegajsBpCZ2JSTCYJbknYdyCIiIhQzcBYQomwTKSphpOwowpkURGh9AFBiWK1AjFGmBFIGiBCREXcmQCMAhbQRbArE3YpAp GDLFEMFhNxZMIiWobigF9SKbAQU7BNyLVjCviEQIWbA2YFuTLcipkgYgQhIoIUwDYQFX0JktRZEZWhbmgAEJMkQKHaCRPUiBbGgEEtIgEjEgykdXBECHcVoTQEuwMlCbKQJM12TMtC+rIhTBdgFdGQOxLQFcdgFlrch2IgS6s2mSQehEakpuZHciYaTUaioaZxyzSfciTDT0gkwbCQNrQPUFqK1IjUgyWsigxRD1KCARyI44ORW1EpKAZQBFuQPWxXMVaEEaTEsZNOgyCHuRiVdEuhKyDcDYEnYJ6kY4Mj7BIgZZLUewhVsDJkiIlqaTkEKCSdBDU0kGJFqwIp6mIGE3J6ktQNAiUsUQK0Bz1G0wVokMQhUmo2CpWGTK7CZ2NIDSJghIxKuDFWCbkgSsKuigu3QqHcbQZXUUYo0txTMzckEaJkRAkXsDCKRRnc0tQEUQwGJNLUzoKZiktK5MCm5GK3Lch1AkIEio1sDCWTMQ7FLKBKIiIgimGRNAKckZmCkJgmjJq8ATAiIiGOhbloQfDI09AQmwNnADsG5AMhZIKikDSAhRRAIiEQJkQhNy2KAqbJE0S1A0hXUFoRGJLcheupEJBuKCKblFpLYUEP0E2GxWIGILYnBdgGAgUy3MQCAr1AiISMSS1D0JakRtDAIdbIiDYo6D2J6ABehCu4Q7BuK1iRaZBbBcVoMbETIRpdQWhpKwSVsJbA9SMTuKa6mdzSJISL6gm9giqDc16ikQzhUkiSEIW7BchJKEJuRaog1Ng1YTvAoiYKNLQNAkqNFEETIxUakky3sIMgRFBMhaim9mTVrlYg0DBMmyJEF6dwvuam0lAAJR0K8kChM+4sJgyymxlSaXYIupbjuTgIlqaUGdxVmyEl9QEmEXqL10L1J66kRbESHYIm2KCOoxBEamRWpkQjWhmoZlAQBpBAwyjSFMytBJLEijMjJijUgA6gJpGBTGEw0yROWCYRruAJsdghRLsAkCyIGAyL1Mi+5ED6ExaAKkakySA0wIghTNLUwjabkg+Gm5MER37ZsEgIgQuXqRVJFv3LsRGtg3GUViIgYsH2BCQmUNyBJAh6kCRF2IhUk/pFKxBDqDNWM1JkQroaMKRkGDKKz0BGpsEJeoFsEKLYh31MQMrQLUkgBGn2YQO8EQfWKsT10BIg2vU1vJhMV85GJb3HYIFhFBWkmW4Chd0WgMjFCGwuCCX1G0ZWthkhJkGT11FXQYpdRQbSaWgETW5DDMUC3FFEakgjS09CcNAtGtACFDIE7bkU7yNKM9zSe7EpJagzuabkz6GKQ17CCNwggTBjBBBcV0Il1CNCjIkRphYG7EtQHYNEKQNXIsEV0CxWkI1ckyJWIjReoJ/OIYlKzK3QiCInv0DsUgaQoymaWhJSUOoPuS1AXoCJu5J3IFmkZnYURGyYJiu4YgjTiDMqQGbijIyEaSsIIiISepSDIQiDYUgNoAKbhMNdwZFFgjewEtCWsBGkJIiIoHYi1CAZAZRAFNyYMDRGTSuQQCHuBrUPUUAQkiRLUD4dQOxmnU0ux3zZyFguQTBgiIgdAYh1CEiLYgnIoFoIFFgfQZ6lYItiL0LvJA9iXWQfqNPQxG1BMzIu4YnsWwIpIG2pLoE69SWoGjRlGkEXoRXEiBCg2K4kLkgc+hIiNrWA3DcSTCHYrySuxIAUQxciKwvUgCFP3NLXuZQpkSWgJO1yDFKxO6IrSRYS1uakFJWCEg3EgZ2FSCFdCJLS2NPS5hSJGMwSDsICigiZEBdSfUiivA9SfQG9iBkp6BsLCFM2YSlGqdNSJJJlNy7aERXJdCfqS1A0rCwmxSRES1K8luELklqMBuBMlqS7j2IHYiJsjEo17mEbSEpKKUJhhGu4EW4EbRlIU7kJagHpJT3BkRNkRdgpUiZEI0rGk+hl6knHqGMw2zO5SQSGiSuSYoiNIH2LYAiFuQJEVGkZFakGgIfcMVsKCLiupUJLUBINKw+hhigxwRDVkwBsZCepIg13AQCJGkZLQDTgnqCCWQbWmoIEKAUK1DQQj4VGjCN7HfS2cMm4JgYypRCCEFaBuIMiNASJhDoZ3JXYpAS0KwwRAdbk3YQCBa3N2M7mqdCLJSsaBblHUxYpkVySADVNjI3CNrU0vpMLUZYYnvIhIS5IYPuJkpINP1JXM9zS01CHcdg7lv2JIULBDtcjFIpsHsKkDREp6iRil85Be5AKNLoZ3EiFhYUrATKKSLcdiKlIh6DsENOpozIpkQ7MtwEiEbNghXUiFOCd/QtrkBFtAerKbBDdjYCQCkRDaCIinpYkwCGbm9TjRq+gkmGmEiZ9CJg6ERAwdxM7GlYiNTYtQmUBGLaAkIDKBgIQo1Jl3JahG5MvqUkREQGkFM2BjrYLzBENy0LRFsAg9CJ3IJdRQKRCKRkNyASJI0RjKRqTDhFIRySgZlaiEKFASA0RSS0IFegqJ6gKYYlCCKQjXYGRMCRBuaCIGJMAH3DYUQaWpbgQYl6kAkADNMywsGRTBEBsjJpBHwyjc0AneNmRMiZED0EBWlwoNAhmwQ26k9DIkTC3kUiSkUAsPQgQQ7lBIdUYgi4oSREIqAZMItweo7EQBXH0JIqEQhEyBXUnt0K8SSTIIupFAQo0ECSUlWJFqKW5EQkSViIip1L2LYiFDeChitAklfihuKGJImRsKIlqRGnEQYcyTfQpuQhepvYFoMW1BLO8MnYXA+5FFxIkRFfqM3EtiIkbRi8yb0sGMmQcSD6BIRCAgPcJ1IkBJlMkUXIrS6svcikMTNoGTJBG2AJvUGQbRIymPcIXqOpmeppWREKfYpvcGXqAzaJGQLcgU3ozSd7mTVPYjGStS3IghIN7sdgxDYoLkgrSJol9AtERLQHZ2HsQQrS5MUUEMsj6kMgC6mjPuKKklGtjI7EYyqgFvYmu4VCCuTCNItzMmqehEI9iViCFCZ2JOxBotCWppFYhMWBNqSBIBWgCwuWohFcty7DBAgyGQjNxIgNepl6jNjLBBRTcJKSGCaTvcwmKBh8UikER3rZcNSUmXJIkmCIGkiINi0RaEyiLciRBtadCBa3LaximC7IFqWoLcENruXsCNESUXctyIhBiW8BASFAwH2NxBhdxbCSSLuCZEIhKHYgDSRUiiZSZUBvEm4krSGOQpEg2IHsIehK5Ea2Ip6A7ECiX0kX0BGkJmk02iItgREyB2JQ0WqDRECaMS2zS0ILcRAIS7GX63FTJJMNEWxEYtA3INyikBncPUDSdgBamjMyzS6BJRaAIEvUe5m4oDQEPYMUw3IYdyBWhATIhUXFdgQ+4EjaRhG1a5GMl0yjJtO5l9JIQJFGRKNIVKZmfnNIko3KAE7EyMcCWmakB+sElJQLQXkZdwiKQ9yCNSEsFA+oCma31MhJEw3tISEyTASQCugGkM2M7ARMNNySMzc12Bhp+pPuCYhiGxTuAkGqWJg0nIYkFZEjUACNSGxBGkXcLkyGDImJNJlQkx3IgkaTM6MJCYaC5F2Iikp7gQXBbIyyTLgwmQ7E+pFBpO5kUB8WhBGju2xiCXYXYoCZQkBAsHqOxlgRE+pbhWkzRhMUyISJdisGJRpAmW2piFkUiEAsiIhYepE/UIhn5wWogKJkDIkJTDFepIZA0IFJihT6smEkEwZsQSoFkEK6gxIhU6mjFxWtmRDuWobmqeuhJDFgcyKGJUkYg0laxlamk2JJOxmrsavqUESGBTjewwSViSrSgnpcFPQYIggYtIoUu4TKB9TXUIIjDIWUAQzqgSNKIBkIW1sSnUgiYpAvpNSAFuOgIIVZCw3KxEO5aAhAY7lAL5hIImXuaWoQI2nYylJpIiSfcqiSGNSMWGivoLIqgUQokh+omArQiHU0GxIMTJblsQRNFqRe4FoKYTYgFkgTJMiFSaM+g7kEyJClYBKpCQYs+woo6F3LkK1NMyamxJQT7FKkHcldjBhsTKY6EYtJqBMqxSBoCLeAhTIkQESEANJjJkp6Bi02CsEiRVImDU2CYJMpBwURINwkDcyTMp9RIYIoGKdwPikKDYfQ7psRaggTBguQaWpbgQYl6kAkADNMywsGRTBEBsjJpBHwyjc0AneNmRMiZED0EBWlwoNAhmwQ26k9DIkTC3kUiSkUAsPQgQQ7lBIdUYgi4oSREIqAZMItweo7EQBXH0JIqEQhEyBXUnt0K8SSTIIupFAQo0ECSUlWJFqKW5EQkSViIip1L2LYiFDeChitAklfihuKGJImRsKIlqRGnEQYcyTfQpuQhepvYFoMW1BLO8MnYXA+5FFxIkRFfqM3EtiIkbRi8yb0sGMmQcSD6BIRCAgPcJ1IkBJlMkUXIrS6svcikMTNoGTJBG2AJvUGQbRIymPcIXqOpmeppWREKfYpvcGXqAzaJGQLcgU3ozSd7mTVPYjGStS3IghIN7sdgxDYoLkgrSJol9AtERLQHZ2HsQQrS5MUUEMsj6kMgC6mjPuKKklGtjI7EYyqgFvYmu4VCCuTCNItzMmqehEI9iViCFCZ2JOxBotCWppFYhMWBNqSBIBWgCwuWohFcty7DBAgyGQjNxIgNepl6jNjLBBRTcJKSGCaTvcwmKBh8UikER3rZcNSUmXJIkmCIGkiINi0RaEyiLciRBtadCBa3LaximC7IFqWoLcENruXsCNESUXctyIhBiW8BASFAwH2NxBhdxbCSSLuCZEIhKHYgDSRUiiZSZUBvEm4krSGOQpEg2IHsIehK5Ea2Ip6A7ECiX0kX0BGkJmk02iItgREyB2JQ0WqDRECaMS2zS0ILcRAIS7GX63FTJJMNEWxEYtA3INyikBncPUDSdgBamjMyzS6BJRaAIEvUe5m4oDQEPYMUw3IYdyBWhATIhUXFdgQ+4EjaRhG1a5GMl0yjJtO5l9JIQJFGRKNIVKZmfnNIko3KAE7EyMcCWmakB+sElJQLQXkZdwiKQ9yCNSEsFA+oCma31MhJEw3tISEyTASQCugGkM2M7ARMNNySMzc12Bhp+pPuCYhiGxTuAkGqWJg0nIYkFZEjUACNSGxBGkXcLkyGDImJNJlQkx3IgkaTM6MJCYaC5F2Iikp7gQXBbIyyTLgwmQ7E+pFBpO5kUB8WhBGju2xiCXYXYoCZQkBAsHqOxlgRE+pbhWkzRhMUyISJdisGJRpAmW2piFkUiEAsiIhYepE/UIhn5wWogKJkDIkJTDFepIZA0IFJihT6smEkEwZsQSoFkEK6gxIhU6mjFxWtmRDuWobmqeuhJDFgcyKGJUkYg0laxlamk2JJOxmrsavqUESGBTjewwSViSrSgnpcFPQYIggYtIoUu4TKB9TXUIIjDIWUAQzqgSNKIBkIW1sSnUgiYpAvpNSAFuOgIIVZCw3KxEO5aAhAY7lAL5hIImXuaWoQI2nYylJpIiSfcqiSGNSMWGivoLIqgUQokh+omArQiHU0GxIMTJblsQRNFqRe4FoKYTYgFkgTJMiFSaM+g7kEyJClYBKpCQYs+woo6F3LkK1NMyamxJQT7FKkHcldjBhsTKY6EYtJqBMqxSBoCLeAhTIkQESEANJjJkp6Bi02CsEiRVImDU2CYJMpBwURINwkDcyTMp9RIYIoGKdwPikKDYfQ7psRaggTBguQaWpbgQYl6kAkADNMywsGRTBEBsjJpBHwyjc0AneNmRMiZED0EBWlwoNAhmwQ26k9DIkTC3kUiSkUAsPQgQQ7lBIdUYgi4oSREIqAZMItweo7EQBXH0JIqEQhEyBXUnt0K8SSTIIupFAQo0ECSUlWJFqKW5EQkSViIip1L2LYiFDeChitAklfihuKGJImRsKIlqRGnEQYcyTfQpuQhepvYFoMW1BLO8MnYXA+5FFxIkRFfqM3EtiIkbRi8yb0sGMmQcSD6BIRCAgPcJ1IkBJlMkUXIrS6svcikMTNoGTJBG2AJvUGQbRIymPcIXqOpmeppWREKfYpvcGXqAzaJGQLcgU3ozSd7mTVPYjGStS3IghIN7sdgxDYoLkgrSJol9AtERLQHZ2HsQQrS5MUUEMsj6kMgC6mjPuKKklGtjI7EYyqgFvYmu4VCCuTCNItzMmqehEI9iViCFCZ2JOxBotCWppFYhMWBNqSBIBWgCwuWohFcty7DBAgyGQjNxIgNepl6jNjLBBRTcJKSGCaTvcwmKBh8UikER3rZcNSUmXJIkmCIGkiINi0RaEyiLciRBtadCBa3LaximC7IFqWoLcENruXsCNESUXctyIhBiW8BASFAwH2NxBhdxbCSSLuCZEIhKHYgDSRUiiZSZUBvEm4krSGOQpEg2IHsIehK5Ea2Ip6A7ECiX0kX0BGkJmk02iItgREyB2JQ0WqDRECaMS2zS0ILcRAIS7GX63FTJJMNEWxEYtA3INyikBncPUDSdgBamjMyzS6BJRaAIEvUe5m4oDQEPYMUw3IYdyBWhATIhUXFdgQ+4EjaRhG1a5GMl0yjJtO5l9JIQJFGRKNIVKZmfnNIko3KAE7EyMcCWmakB+sElJQLQXkZdwiKQ9yCNSEsFA+oCma31MhJEw3tISEyTASQCugGkM2M7ARMNNySMzc12Bhp+pPuCYhiGxTuAkGqWJg0nIYkFZEjUACNSGxBGkXcLkyGDImJNJlQkx3IgkaTM6MJCYaC5F2Iikp7gQXBbIyyTLgwmQ7E+pFBpO5kUB8WhBGju2xiCXYXYoCZQkBAsHqOxlgRE+pbhWkzRhMUyISJdisGJRpAmW2piFkUiEAsiIhYepE/UIhn5wWogKJkDIkJTDFepIZA0IFJihT6smEkEwZsQSoFkEK6gxIhU6mjFxWtmRDuWobmqeuhJDFgcyKGJUkYg0laxlamk2JJOxmrsavqUESGBTjewwSViSrSgnpcFPQYIggYtIoUu4TKB9TXUIIjDIWUAQzqgSNKIBkIW1sSnUgiYpAvpNSAFuOgIIVZCw3KxEO5aAhAY7lAL5hIImXuaWoQI2nYylJpIiSfcqiSGNSMWGivoLIqgUQokh+omArQiHU0GxIMTJblsQRNFqRe4FoKYTYgFkgTJMiFSaM+g7kEyJClYBKpCQYs+woo6F3LkK1NMyamxJQT7FKkHcldjBhsTKY6EYtJqBMqxSBoCLeAhTIkQESEANJjJkp6Bi02CsEiRVImDU2CYJMpBwURINwkDcyTMp9RIYIoGKdwPikKDYfQ7psRaggTBguQaWpbgQYl6kAkADNMywsGRTBEBsjJpBHwyjc0AneNmRMiZED0EBWlwoNAhmwQ26k9DIkTC3kUiSkUAsPQgQQ7lBIdUYgi4oSREIqAZMItweo7EQBXH0JIqEQhEyBXUnt0K8SSTIIupFAQo0ECSUlWJFqKW5EQkSViIip1L2LYiFDeChitAklfihuKGJImRsKIlqRGnEQYcyTfQpuQhepvYFoMW1BLO8MnYXA+5FFxIkRFfqM3EtiIkbRi8yb0sGMmQcSD6BIRCAgPcJ1IkBJlMkUXIrS6svcikMTNoGTJBG2AJvUGQbRIymPcIXqOpmeppWREKfYpvcGXqAzaJGQLcgU3ozSd7mTVPYjGStS3IghIN7sdgxDYoLkgrSJol9AtERLQHZ2HsQQrS5MUUEMsj6kMgC6mjPuKKklGtjI7EYyqgFvYmu4VCCuTCNItzMmqehEI9iViCFCZ2JOxBotCWppFYhMWBNqSBIBWgCwuWohFcty7DBAgyGQjNxIgNepl6jNjLBBRTcJKSGCaTvcwmKBh8UikER3rZcNSUmXJIkmCIGkiINi0RaEyiLciRBtadCBa3LaximC7IFqWoLcENruXsCNESUXctyIhBiW8BASFAwH2NxBhdxbCSSLuCZEIhKHYgDSRUiiZSZUBvEm4krSGOQpEg2IHsIehK5Ea2Ip6A7ECiX0kX0BGkJmk02iItgREyB2JQ0WqDRECaMS2zS0ILcRAIS7GX63FTJJMNEWxEYtA3INyikBncPUDSdgBamjMyzS6BJRaAIEvUe5m4oDQEPYMUw3IYdyBWhATIhUXFdgQ+4EjaRhG1a5GMl0yjJtO5l9JIQJFGRKNIVKZmfnNIko3KAE7EyMcCWmakB+sElJQLQXkZdwiKQ9yCNSEsFA+oCma31MhJEw3tISEyTASQCugGkM2M7ARMNNySMzc12Bhp+pPuCYhiGxTuAkGqWJg0nIYkFZEjUACNSGxBGkXcLkyGDImJNJlQkx3IgkaTM6MJCYaC5F2Iikp7gQXBbIyyTLgwmQ7E+pFBpO5kUB8WhBGju2xiCXYXYoCZQkBAsHqOxlgRE+pbhWkzRhMUyISJdisGJRpAmW2piFkUiEAsiIhYepE/UIhn5wWogKJkDIkJTDFepIZA0IFJihT6smEkEwZsQSoFkEK6gxIhU6mjFxWtmRDuWobmqeuhJDFgcyKGJUkYg0laxlamk2JJOxmrsavqUESGBTjewwSViSrSgnpcFPQYIggYtIoUu4TKB9TXUIIjDIWUAQzqgSNKIBkIW1sSnUgiYpAvpNSAFuOgIIVZCw3KxEO5aAhAY7lAL5hIImXuaWoQI2nYylJpIiSfcqiSGNSMWGivoLIqgUQokh+omArQiHU0GxIMTJblsQRNFqRe4FoKYTYgFkgTJMiFSaM+g7kEyJClYBKpCQYs+woo6F3LkK1NMyamxJQT7FKkHcldjBhsTKY6EYtJqBMqxSBoCLeAhTIkQESEANJjJkp6Bi02CsEiRVImDU2CYJMpBwURINwkDcyTMp9RIYIoGKdwPikKDYfQ7psRaggTBguQ=="
+const UNIMART_LOGO_URI = "data:image/png;base64,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"
 
 const css = `
   @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap');
@@ -97,6 +96,21 @@ const css = `
   ::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 2px; }
 
   @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+
+  .banner-track {
+    display: flex;
+    width: max-content;
+    animation: marquee 28s linear infinite;
+  }
+  .banner-track:hover { animation-play-state: paused; }
+
+  .banner-sep {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 4px; height: 4px; border-radius: 50%;
+    background: rgba(255,255,255,0.5);
+    margin: 0 20px; flex-shrink: 0;
+  }
   @keyframes spin { to { transform: rotate(360deg); } }
   @keyframes pulseRing { 0% { transform: scale(1); opacity: 0.6; } 100% { transform: scale(2); opacity: 0; } }
   @keyframes scanline { 0% { top: -2px; } 100% { top: calc(100% + 2px); } }
@@ -570,22 +584,45 @@ export function Lister() {
           </div>
         </header>
 
+        {/* ── SHOP SMART BANNER ── */}
+        <div style={{
+          background: 'linear-gradient(90deg, var(--primary-dark) 0%, var(--primary) 50%, #ff7a3c 100%)',
+          overflow: 'hidden',
+          padding: '0',
+          height: 36,
+          display: 'flex',
+          alignItems: 'center',
+          borderBottom: '1px solid rgba(255,255,255,0.1)',
+        }}>
+          <div className="banner-track">
+            {[1, 2].map(n => (
+              <div key={n} style={{ display: 'flex', alignItems: 'center', gap: 0 }}>
+                {[
+                  ['🛍️', 'Shop Smart, Spend Less'],
+                  ['📦', 'List & Sell on Campus'],
+                  ['⚡', 'Fast Campus Delivery'],
+                  ['🎓', 'Built for University Students'],
+                  ['💰', 'Best Campus Prices'],
+                  ['🤝', 'Buy & Sell with Ease'],
+                  ['📱', 'Phones · Books · Fashion · More'],
+                  ['✨', 'Shop Smart, Spend Less'],
+                ].map(([icon, text], i) => (
+                  <span key={i} style={{ display: 'inline-flex', alignItems: 'center', gap: 7, whiteSpace: 'nowrap', fontSize: 12, fontWeight: 600, color: 'white', letterSpacing: '0.04em', padding: '0 6px' }}>
+                    <span style={{ fontSize: 13 }}>{icon}</span>
+                    {text}
+                    <span className="banner-sep" />
+                  </span>
+                ))}
+              </div>
+            ))}
+          </div>
+        </div>
+
         {/* ── MAIN ── */}
         <main style={{ maxWidth: 600, margin: '0 auto', padding: '32px 16px 80px' }}>
 
           {/* Hero */}
           <div className="fade-up" style={{ textAlign: 'center', marginBottom: 32 }}>
-            <div style={{
-              display: 'inline-flex', alignItems: 'center', gap: 6,
-              background: 'var(--primary-light)', border: '1px solid var(--primary-border)',
-              borderRadius: 100, padding: '4px 14px', marginBottom: 18,
-            }}>
-              <span style={{ fontSize: 12 }}>⚡</span>
-              <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--primary)' }}>
-                University Campus Marketplace
-              </span>
-            </div>
-
             <h1 style={{
               fontFamily: 'var(--font)', fontWeight: 800,
               fontSize: 'clamp(30px, 9vw, 52px)',
@@ -596,17 +633,46 @@ export function Lister() {
               <span style={{ color: 'var(--primary)' }}>with RIRI.ai</span>
             </h1>
             <p style={{ color: 'var(--text2)', fontSize: 15, maxWidth: 340, margin: '0 auto', lineHeight: 1.6 }}>
-              AI reads your product photo and fills every field — title, price, tags, and more.
+              Take a photo — RIRI fills your listing title, price, tags and more in seconds.
             </p>
 
-            <div style={{ display: 'flex', justifyContent: 'center', gap: 28, marginTop: 28, flexWrap: 'wrap' }}>
-              {[['⚡', '<5s', 'Analysis'], ['🎯', '95%', 'Accuracy'], ['🆓', 'Free', 'Students']].map(([icon, val, label]) => (
-                <div key={label} style={{ textAlign: 'center' }}>
-                  <div style={{ fontSize: 18, marginBottom: 2 }}>{icon}</div>
-                  <div style={{ fontWeight: 800, fontSize: 20, letterSpacing: '-0.02em', color: 'var(--text)' }}>{val}</div>
-                  <div style={{ fontSize: 10, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.1em', marginTop: 2 }}>{label}</div>
+            <div style={{ display: 'flex', justifyContent: 'center', gap: 32, marginTop: 28, flexWrap: 'wrap' }}>
+              {/* Stat: Speed */}
+              <div style={{ textAlign: 'center' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 40, height: 40, borderRadius: 12, background: 'var(--primary-light)', border: '1.5px solid var(--primary-border)', margin: '0 auto 8px' }}>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+                  </svg>
                 </div>
-              ))}
+                <div style={{ fontWeight: 800, fontSize: 20, letterSpacing: '-0.02em', color: 'var(--text)', lineHeight: 1 }}>&lt;5s</div>
+                <div style={{ fontSize: 10, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.1em', marginTop: 3 }}>Analysis</div>
+              </div>
+              {/* Stat: Accuracy */}
+              <div style={{ textAlign: 'center' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 40, height: 40, borderRadius: 12, background: 'var(--primary-light)', border: '1.5px solid var(--primary-border)', margin: '0 auto 8px' }}>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="12" r="10"/>
+                    <circle cx="12" cy="12" r="4"/>
+                    <line x1="12" y1="2" x2="12" y2="4"/>
+                    <line x1="12" y1="20" x2="12" y2="22"/>
+                    <line x1="2" y1="12" x2="4" y2="12"/>
+                    <line x1="20" y1="12" x2="22" y2="12"/>
+                  </svg>
+                </div>
+                <div style={{ fontWeight: 800, fontSize: 20, letterSpacing: '-0.02em', color: 'var(--text)', lineHeight: 1 }}>95%</div>
+                <div style={{ fontSize: 10, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.1em', marginTop: 3 }}>Accuracy</div>
+              </div>
+              {/* Stat: Free */}
+              <div style={{ textAlign: 'center' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 40, height: 40, borderRadius: 12, background: 'var(--primary-light)', border: '1.5px solid var(--primary-border)', margin: '0 auto 8px' }}>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
+                    <path d="M6 12v5c3 3 9 3 12 0v-5"/>
+                  </svg>
+                </div>
+                <div style={{ fontWeight: 800, fontSize: 20, letterSpacing: '-0.02em', color: 'var(--text)', lineHeight: 1 }}>Free</div>
+                <div style={{ fontSize: 10, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.1em', marginTop: 3 }}>Students</div>
+              </div>
             </div>
           </div>
 
@@ -687,12 +753,20 @@ export function Lister() {
                     <button className="btn btn-primary btn-full btn-lg" onClick={analyze} disabled={stage === 'analyzing'}>
                       {stage === 'analyzing'
                         ? <><span className="spin" /> Analyzing…</>
-                        : stage === 'done' ? '↺ Re-analyze with RIRI' : '⚡ Analyze with RIRI.ai'}
+                        : stage === 'done'
+                          ? <><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.5"/></svg> Re-analyze with RIRI</>
+                          : <><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg> Analyze with RIRI.ai</>}
                     </button>
                     <div style={{ display: 'flex', gap: 10 }}>
-                      <button className="btn btn-outline" onClick={reset} style={{ flex: 1 }}>← Change</button>
+                      <button className="btn btn-outline" onClick={reset} style={{ flex: 1 }}>
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+                        Change
+                      </button>
                       {stage !== 'manual' && stage !== 'analyzing' && (
-                        <button className="btn btn-ghost" onClick={startManual} style={{ flex: 1 }}>📝 Manual</button>
+                        <button className="btn btn-ghost" onClick={startManual} style={{ flex: 1 }}>
+                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                          Manual
+                        </button>
                       )}
                     </div>
                   </div>
@@ -700,12 +774,18 @@ export function Lister() {
               </div>
             ) : (
               <div onClick={() => fileRef.current?.click()} style={{ padding: '48px 20px', textAlign: 'center', cursor: 'pointer' }}>
+                {/* Camera SVG icon box */}
                 <div style={{
-                  width: 72, height: 72, background: 'var(--surface2)',
-                  border: '2px solid var(--border2)', borderRadius: 18,
+                  width: 72, height: 72, background: 'var(--primary-light)',
+                  border: '2px solid var(--primary-border)', borderRadius: 18,
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  margin: '0 auto 20px', fontSize: 28,
-                }}>📸</div>
+                  margin: '0 auto 20px',
+                }}>
+                  <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+                    <circle cx="12" cy="13" r="4"/>
+                  </svg>
+                </div>
                 <div style={{ fontWeight: 700, fontSize: 20, marginBottom: 8, letterSpacing: '-0.01em', color: 'var(--text)' }}>
                   Drop your product photo
                 </div>
@@ -713,20 +793,37 @@ export function Lister() {
                   JPG · PNG · WEBP · HEIC up to 15MB
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10, marginBottom: 4 }}>
-                  <button className="btn btn-primary btn-lg" style={{ padding: '13px 36px', width: '100%', maxWidth: 280 }}>
-                    ⚡ Choose Photo
+                  <button className="btn btn-primary btn-lg" style={{ padding: '13px 36px', width: '100%', maxWidth: 280, gap: 9 }}>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+                    </svg>
+                    Choose Photo
                   </button>
                   <button
                     className="btn btn-ghost btn-lg"
                     onClick={e => { e.stopPropagation(); startManual() }}
-                    style={{ width: '100%', maxWidth: 280 }}
+                    style={{ width: '100%', maxWidth: 280, gap: 9 }}
                   >
-                    📝 List Manually
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                      <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                    </svg>
+                    List Manually
                   </button>
                 </div>
+                {/* Category chips with inline SVG icons */}
                 <div style={{ display: 'flex', justifyContent: 'center', gap: 6, marginTop: 20, flexWrap: 'wrap' }}>
-                  {['📚 Books', '💻 Laptops', '👕 Fashion', '📱 Phones', '🪑 Furniture', '🎮 Gaming'].map(t => (
-                    <span key={t} style={{ background: 'var(--surface2)', border: '1px solid var(--border)', borderRadius: 100, padding: '3px 10px', fontSize: 11, color: 'var(--text2)' }}>{t}</span>
+                  {[
+                    { label: 'Books', icon: <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg> },
+                    { label: 'Laptops', icon: <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M0 21h24"/></svg> },
+                    { label: 'Fashion', icon: <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.38 3.46L16 2a4 4 0 01-8 0L3.62 3.46a2 2 0 00-1.34 2.23l.58 3.57a1 1 0 00.99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 002-2V10h2.15a1 1 0 00.99-.84l.58-3.57a2 2 0 00-1.34-2.23z"/></svg> },
+                    { label: 'Phones', icon: <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18" strokeWidth="3"/></svg> },
+                    { label: 'Furniture', icon: <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="7" width="20" height="11" rx="2"/><path d="M2 12h20M6 7V5a1 1 0 011-1h10a1 1 0 011 1v2M6 18v2M18 18v2"/></svg> },
+                    { label: 'Gaming', icon: <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="6" y1="12" x2="10" y2="12"/><line x1="8" y1="10" x2="8" y2="14"/><line x1="15" y1="13" x2="15.01" y2="13" strokeWidth="3"/><line x1="18" y1="11" x2="18.01" y2="11" strokeWidth="3"/><rect x="2" y="8" width="20" height="12" rx="3"/></svg> },
+                  ].map(({ label, icon }) => (
+                    <span key={label} style={{ background: 'var(--surface2)', border: '1px solid var(--border)', borderRadius: 100, padding: '4px 10px', fontSize: 11, color: 'var(--text2)', display: 'inline-flex', alignItems: 'center', gap: 5 }}>
+                      {icon}{label}
+                    </span>
                   ))}
                 </div>
               </div>
@@ -951,7 +1048,11 @@ export function Lister() {
                       animation: 'fadeUp 0.25s cubic-bezier(0.22,1,0.36,1) both',
                     }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
-                        <span style={{ fontSize: 18 }}>{paymentMethod === 'mtn' ? '📲' : '📱'}</span>
+                        <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 28, height: 28, borderRadius: 7, background: paymentMethod === 'mtn' ? 'rgba(252,209,22,0.3)' : 'rgba(218,41,28,0.15)' }}>
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={paymentMethod === 'mtn' ? '#8B6200' : '#8B1A12'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18" strokeWidth="3"/>
+                          </svg>
+                        </span>
                         <div>
                           <div style={{ fontWeight: 700, fontSize: 13, color: 'var(--text)' }}>
                             {paymentMethod === 'mtn' ? 'MTN Mobile Money' : 'Telecel Cash'} Number
@@ -1104,7 +1205,10 @@ export function Lister() {
                   <button
                     className={`btn btn-full ${whatsappJoined ? 'btn-success' : 'btn-outline'}`}
                     onClick={() => { window.open('https://chat.whatsapp.com/your-channel-link', '_blank'); setWhatsappJoined(true) }}>
-                    {whatsappJoined ? '✓ Joined!' : '💬 Join Channel'}
+                    {whatsappJoined
+                      ? <><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Joined!</>
+                      : <><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg> Join Channel</>
+                    }
                   </button>
                 </div>
 
@@ -1123,7 +1227,9 @@ export function Lister() {
                 {/* Submit */}
                 <button className="btn btn-primary btn-full btn-lg" onClick={handleSubmit} disabled={isSubmitting}
                   style={{ fontWeight: 700, letterSpacing: '-0.01em' }}>
-                  {isSubmitting ? <><span className="spin" /> Saving listing…</> : '⚡ Post Listing'}
+                  {isSubmitting
+                    ? <><span className="spin" /> Saving listing…</>
+                    : <><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg> Post Listing</>}
                 </button>
 
                 {stage === 'manual' && (
@@ -1238,13 +1344,14 @@ export function Lister() {
               {title && (
                 <div style={{
                   background: 'var(--primary-light)', border: '1px solid var(--primary-border)',
-                  borderRadius: 100, padding: '7px 18px', display: 'inline-block',
+                  borderRadius: 100, padding: '7px 18px', display: 'inline-flex', alignItems: 'center', gap: 7,
                   fontSize: 13, fontWeight: 600, color: 'var(--primary)',
                   marginBottom: 24, maxWidth: '100%',
                   overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
                   animation: 'fadeUp 0.4s ease 0.55s both', opacity: 0,
                 }}>
-                  📦 {title}
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+                  {title}
                 </div>
               )}
 
@@ -1252,13 +1359,15 @@ export function Lister() {
                 <button
                   className="btn btn-primary btn-full"
                   onClick={() => { setSubmitted(false); reset() }}
-                  style={{ fontWeight: 700, fontSize: 15 }}>
-                  ⚡ List Another Product
+                  style={{ fontWeight: 700, fontSize: 15, gap: 9 }}>
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                  List Another Product
                 </button>
                 <button
                   className="btn btn-ghost btn-full"
                   onClick={() => setSubmitted(false)}
-                  style={{ fontSize: 14 }}>
+                  style={{ fontSize: 14, gap: 9 }}>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
                   View My Listing
                 </button>
               </div>
