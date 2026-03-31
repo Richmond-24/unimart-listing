@@ -593,7 +593,7 @@ export default function Lister() {
         <header className="header">
           <div className="header-inner">
             <a href="/" className="logo-wrap">
-              <img src="/logo.png" alt="Uni-Mart Logo" className="logo-image" onError={(e) => { e.currentTarget.src = '/fallback-logo.png'; }} />
+              <img src="/logo2.png" alt="Uni-Mart Logo" className="logo-image" onError={(e) => { e.currentTarget.src = '/fallback-logo.png'; }} />
               <div className="logo-text-block">
                 <span className="logo-name">RIRI<span className="logo-dot">.</span>ai</span>
                 <span className="logo-sub">by Uni-Mart</span>
