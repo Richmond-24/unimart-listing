@@ -177,6 +177,7 @@ export default function Lister() {
     {r:'b', t:"Hi! I'm RIRI 🤖 Ask me anything about listing on Uni-Mart!"}
   ]);
   const [chatIn, setChatIn] = useState('');
+  const [robotAnimating, setRobotAnimating] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const formRef = useRef<HTMLDivElement>(null);
@@ -524,13 +525,50 @@ export default function Lister() {
       throw new Error(result.error || 'Failed to save listing');
     }
     
+    // Trigger robot animation
+    setRobotAnimating(true);
+    
+    // Send confirmation email to seller
+    try {
+      const emailRes = await fetch('/api/send-listing-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          sellerName: sanitizedSellerName,
+          sellerEmail: sellerEmail.toLowerCase().trim(),
+          sellerPhone: sellerPhone || undefined,
+          title: sanitizedTitle,
+          price: priceNum,
+          discount: discount ? parseInt(discount) : null,
+          condition: condition,
+          category: category,
+          brand: sanitizedBrand || undefined,
+          deliveryType: deliveryType === 'unimart' ? 'unimart' : 'self',
+          paymentMethod: paymentMethod || 'mtn',
+          description: sanitizedDescription,
+          tags: tags.slice(0, 12),
+          imageUrls: cloudUrls,
+        }),
+      });
+      
+      if (!emailRes.ok) {
+        console.warn('Email notification may have failed, but listing was created:', emailRes.statusText);
+      } else {
+        const emailData = await emailRes.json();
+        console.log('✅ Email sent:', emailData);
+      }
+    } catch (emailErr) {
+      console.warn('Email sending error (non-blocking):', emailErr);
+    }
+    
     setSubmitted(true);
     setTimeout(() => { 
       reset(); 
       setSubmitted(false);
+      setRobotAnimating(false);
       if (fileRef2.current) fileRef2.current = null;
       if (additionalImagesRef.current) additionalImagesRef.current.value = '';
-    }, 5000);
+    }, 6000);
     
   } catch (err) {
     setSubmitError(err instanceof Error ? err.message : 'Failed to save listing');
@@ -684,7 +722,7 @@ export default function Lister() {
               <line x1="95" y1="60" x2="72" y2="65" stroke="#2154e0" strokeWidth="1" opacity=".5"/>
             </svg>
           </div>
-          <div className="robot" onClick={()=>setChatOpen(o=>!o)}>
+          <div className={`robot ${robotAnimating ? 'robot-dance' : ''}`} onClick={()=>setChatOpen(o=>!o)}>
             <div className="r-head"><div className="r-antenna"><div className="r-antenna-orb"/></div><div className="r-visor"><div className="r-eye-l"/><div className="r-eye-r"/><div className="r-mouth-bar"/></div><div className="r-ear r-ear-l"/><div className="r-ear r-ear-r"/></div>
             <div className="r-body"><div className="r-chest"><div className="r-dot r-dot1"/><div className="r-dot r-dot2"/><div className="r-dot r-dot3"/></div><div className="r-belly"><svg width="28" height="18" viewBox="0 0 28 18" fill="none"><rect x="0" y="0" width="28" height="18" rx="4" fill="rgba(8,145,178,0.12)"/><path d="M4 9 L8 5 L12 9 L16 13 L20 9 L24 13" stroke="#0891B2" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/></svg></div></div>
             <div className="r-arm-l"/><div className="r-arm-r"/><div className="r-legs"><div className="r-leg"/><div className="r-leg"/></div><div className="r-chat-dot"/>
@@ -837,7 +875,32 @@ export default function Lister() {
         <footer className="footer"><div className="footer-grid"><div className="footer-brand-col"><div className="footer-logo"><div className="footer-logo-mark"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 2L2 7l10 5 10-5-10-5z" fill="white"/><path d="M2 17l10 5 10-5" stroke="white" strokeWidth="2" fill="none" strokeLinecap="round"/><path d="M2 12l10 5 10-5" stroke="white" strokeWidth="2" fill="none" strokeLinecap="round" opacity=".6"/></svg></div><span className="footer-logo-name">RIRI.ai <span className="footer-logo-riri">· by Uni-Mart</span></span></div><p className="footer-tagline">Ghana's AI-powered campus marketplace with fake detection & smart pricing.</p><div className="footer-status"><span className="f-dot"/><span>RIRI.ai is online</span></div></div><div className="footer-links"><div className="fl-col"><p className="fl-head">Platform</p><a href="https://uni-mart.com" className="fl">Home</a><a href="https://uni-mart.com/marketplace" className="fl">Marketplace</a><a href="https://uni-mart.com/sell" className="fl">Sell</a></div><div className="fl-col"><p className="fl-head">Company</p><a href="https://uni-mart.com/about" className="fl">About</a><a href="https://uni-mart.com/blog" className="fl">Blog</a><a href="https://uni-mart.com/careers" className="fl">Careers</a></div><div className="fl-col"><p className="fl-head">Legal</p><a href="https://uni-mart.com/trust" className="fl">Trust & Safety</a><a href="https://uni-mart.com/privacy" className="fl">Privacy</a><a href="https://uni-mart.com/terms" className="fl">Terms</a></div></div></div><div className="footer-bottom"><span>© 2025 Uni-Mart Ghana</span><span>·</span><span>AI-Powered Listings</span></div></footer>
 
         {/* SUCCESS MODAL */}
-        {submitted && !submitError && (<div className="modal-bg" onClick={()=>setSubmitted(false)}><div className="modal" onClick={e=>e.stopPropagation()}><div className="modal-check"><IconCheck/></div><div className="modal-stars">{[...Array(5)].map((_,i)=><IconStar key={i}/>)}</div><h2 className="modal-h">Listing Live! 🎉</h2><p className="modal-p">Your item is now visible to buyers across the Uni-Mart campus marketplace.</p>{title&&<div className="modal-item">{title}</div>}<button className="btn-primary w-full" onClick={()=>{setSubmitted(false);reset();}}><IconZap/>List Another</button><button className="btn-ghost w-full mt8" onClick={()=>setSubmitted(false)}>View My Listing</button><p className="modal-note">Confirmation sent to {sellerEmail||'your email'}</p></div></div>)}
+        {submitted && !submitError && (
+          <div className="modal-bg" onClick={()=>setSubmitted(false)}>
+            <div className="modal success-modal" onClick={e=>e.stopPropagation()}>
+              <div className="modal-check"><IconCheck/></div>
+              <div className="modal-stars">{[...Array(5)].map((_,i)=><IconStar key={i}/>)}</div>
+              <h2 className="modal-h">Listing Live! 🎉</h2>
+              <p className="modal-p">Your item is now visible to buyers across the Uni-Mart campus marketplace.</p>
+              
+              {/* EMAIL CHECK NOTIFICATION */}
+              <div className="email-notification">
+                <div className="email-icon"><IconMail/></div>
+                <div className="email-content">
+                  <h3 className="email-title">📧 Check Your Email!</h3>
+                  <p className="email-text">We've sent a confirmation email with all your listing details to:</p>
+                  <p className="email-address">{sellerEmail || 'your email'}</p>
+                  <p className="email-subtitle">Please check your inbox & spam folder</p>
+                </div>
+              </div>
+              
+              {title&&<div className="modal-item">{title}</div>}
+              
+              <button className="btn-primary w-full" onClick={()=>{setSubmitted(false);reset();}}><IconZap/>List Another</button>
+              <button className="btn-ghost w-full mt8" onClick={()=>setSubmitted(false)}>View My Listing</button>
+            </div>
+          </div>
+        )}
 
       </div>
     </>
@@ -947,6 +1010,10 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);min-height:10
 .robot{margin-top:-10px;cursor:pointer;display:flex;flex-direction:column;align-items:center;position:relative;transition:transform .2s;-webkit-tap-highlight-color:transparent;}
 .robot:hover{transform:scale(1.04);}
 .robot:active{transform:scale(.97);}
+@keyframes robotDance{0%,100%{transform:translateY(0) rotate(0deg);}10%{transform:translateY(-8px) rotate(-3deg);}20%{transform:translateY(-12px) rotate(3deg);}30%{transform:translateY(-8px) rotate(-2deg);}40%{transform:translateY(0) rotate(2deg);}50%{transform:translateY(-10px) rotate(0deg);}60%{transform:translateY(-6px) rotate(-3deg);}70%{transform:translateY(-12px) rotate(3deg);}80%{transform:translateY(-4px) rotate(-1deg);}90%{transform:translateY(-10px) rotate(2deg);}}
+@keyframes robotArmDance{0%,100%{transform:rotate(-18deg);}15%{transform:rotate(-45deg);}35%{transform:rotate(-10deg);}55%{transform:rotate(-50deg);}75%{transform:rotate(-15deg);}}.robot.robot-dance{animation:robotDance 1.2s ease-in-out 5;}
+.robot.robot-dance .r-arm-l{animation:robotArmDance 1.2s ease-in-out 5;}
+.robot.robot-dance .r-arm-r{animation:robotArmDance 1.2s ease-in-out 5 reverse;}
 .r-head{width:52px;height:44px;background:white;border:2.5px solid var(--or);border-radius:14px;position:relative;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(8,145,178,0.22);}
 .r-antenna{position:absolute;top:-14px;left:50%;transform:translateX(-50%);width:2.5px;height:12px;background:var(--or);}
 .r-antenna-orb{width:9px;height:9px;border-radius:50%;background:var(--or);position:absolute;top:-9px;left:50%;transform:translateX(-50%);box-shadow:0 0 8px var(--or);animation:orbPulse 1.5s ease-in-out infinite;}
@@ -1202,6 +1269,17 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);min-height:10
 .modal-p{font-size:14px;color:var(--txt2);line-height:1.65;margin-bottom:16px;}
 .modal-item{background:var(--or-l);border:1px solid var(--or-b);border-radius:100px;padding:7px 16px;display:inline-block;font-size:13px;font-weight:700;color:var(--or);margin-bottom:18px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .modal-note{font-size:11px;color:var(--txt3);margin-top:12px;line-height:1.5;}
+/* EMAIL NOTIFICATION STYLES */
+.email-notification{background:linear-gradient(135deg,rgba(8,145,178,.08) 0%,rgba(6,214,208,.06) 100%);border:1.5px solid var(--or);border-radius:16px;padding:16px;margin:16px 0;display:flex;gap:12px;align-items:flex-start;animation:slideInEmail .5s cubic-bezier(.22,1,.36,1) both;}
+.email-icon{flex-shrink:0;width:48px;height:48px;background:var(--or);border-radius:12px;display:flex;align-items:center;justify-content:center;color:white;font-size:24px;box-shadow:0 4px 12px rgba(8,145,178,.25);}
+.email-content{flex:1;text-align:left;}
+.email-title{font-size:15px;font-weight:700;color:var(--or);margin-bottom:6px;letter-spacing:-.02em;}
+.email-text{font-size:13px;color:var(--txt2);line-height:1.5;margin-bottom:6px;}
+.email-address{font-size:12px;font-weight:700;color:var(--or);background:rgba(8,145,178,.12);padding:6px 10px;border-radius:6px;word-break:break-all;margin-bottom:6px;}
+.email-subtitle{font-size:11px;color:var(--txt3);margin-bottom:0;font-style:italic;}
+.success-modal{position:relative;}
+.success-modal::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,#0891B2,#06D6D0,#0891B2);border-radius:var(--r-xl) var(--r-xl) 0 0;}
+@keyframes slideInEmail{from{transform:translateY(12px);opacity:0;}to{transform:translateY(0);opacity:1;}}
 @keyframes sway{0%,100%{transform:rotate(-2.5deg);}50%{transform:rotate(2.5deg);}}
 @keyframes floatIcon{0%,100%{transform:translateY(0px);}50%{transform:translateY(-12px);}}
 @keyframes orbPulse{0%,100%{transform:translateX(-50%) scale(1);box-shadow:0 0 8px var(--or);}50%{transform:translateX(-50%) scale(1.35);box-shadow:0 0 14px var(--or);}}

@@ -25,7 +25,7 @@ interface ListingResponse {
 
 // ==================== WEBHOOK CONFIGURATION ====================
 
-const ZAPIER_WEBHOOK_URL = 'https://hooks.zapier.com/hooks/catch/26725705/ux4gb6x/';
+const ZAPIER_WEBHOOK_URL = process.env.ZAPIER_WEBHOOK_URL || 'https://hooks.zapier.com/hooks/catch/26725705/ux4gb6x/';
 
 // ==================== ENCRYPTION ====================
 
