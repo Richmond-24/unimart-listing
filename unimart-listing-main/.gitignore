@@ -1,13 +1,67 @@
+# Dependencies
 node_modules/
-.env
-.env.local
-.env.production.local
+.pnp/
+.pnp.js
+.yarn/
+
+# Next.js
+.next/
+out/
 build/
 dist/
-.next/
+
+# Environment variables
+.env
+.env.local
+.env.production
+.env.development
+.env.test
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS files
 .DS_Store
-npm-debug.log
-.env.local
-.env
-.env.local
-.env
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Database
+*.db
+*.sqlite
+
+# Secrets
+*.key
+*.pem
+*.crt
+
+# Backend
+backend/node_modules/
+backend/.env
+
+# Admin site
+admin-site/node_modules/
+admin-site/.env
+
+# Build outputs
+dist/
+build/
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Coverage
+coverage/
+.nyc_output/
+
+# Vercel
+.vercel
