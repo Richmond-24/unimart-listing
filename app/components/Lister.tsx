@@ -34,19 +34,54 @@ interface FormData {
   paymentMethod: string;
 }
 
-// --- Mock RIRI AI Service ---
-const mockRiriAI = async (file: File) => {
-  return new Promise<Partial<FormData>>((resolve) => {
-    setTimeout(() => {
-      resolve({
-        title: "Premium Wireless Headphones",
-        description: "High-quality noise cancelling headphones with 30h battery life. Barely used.",
-        price: "1200",
-        category: "Electronics",
-        condition: "Like New"
-      });
-    }, 2500);
-  });
+/**
+ * Real AI Service - Gemini-powered analysis for video/image content
+ * Transcribes video content and auto-fills seller + product details
+ */
+const analyzeVideoWithAI = async (file: File) => {
+  try {
+    const formData = new FormData();
+    formData.append('video', file);
+
+    console.log('[v0] Sending video to AI analysis API...');
+
+    const response = await fetch('/api/analyze-video', {
+      method: 'POST',
+      body: formData,
+    });
+
+    if (!response.ok) {
+      throw new Error(`API responded with ${response.status}`);
+    }
+
+    const data = await response.json();
+    console.log('[v0] AI analysis result:', data);
+
+    if (!data.success) {
+      throw new Error(data.error || 'Analysis failed');
+    }
+
+    const listing = data.listing || {};
+
+    return {
+      title: listing.title || '',
+      description: listing.description || '',
+      price: listing.suggestedPrice?.toString() || '',
+      category: listing.category || '',
+      condition: listing.condition || 'Good',
+      brand: listing.brand || '',
+      tags: listing.tags || [],
+      confidence: listing.confidence || 0,
+      // Seller info extracted from video
+      sellerName: listing.sellerName || '',
+      sellerEmail: listing.sellerEmail || '',
+      sellerLocation: listing.sellerLocation || '',
+      sellerPhone: listing.sellerPhone || '',
+    };
+  } catch (error) {
+    console.error('[v0] AI analysis error:', error);
+    throw error;
+  }
 };
 
 export default function Lister() {
@@ -87,10 +122,19 @@ export default function Lister() {
     if (mode === 'ai') {
       setIsLoading(true);
       try {
-        const aiData = await mockRiriAI(file);
-        setFormData(prev => ({ ...prev, ...aiData }));
+        console.log('[v0] Starting AI video analysis...');
+        const aiData = await analyzeVideoWithAI(file);
+        console.log('[v0] AI data received:', aiData);
+        setFormData(prev => ({ 
+          ...prev, 
+          ...aiData,
+          // Auto-fill seller info if available from video analysis
+          sellerName: aiData.sellerName || prev.sellerName,
+          sellerEmail: aiData.sellerEmail || prev.sellerEmail,
+        }));
       } catch (error) {
-        console.error("AI Error", error);
+        console.error('[v0] AI Error:', error);
+        alert('Failed to analyze video. Please try again or fill details manually.');
       } finally {
         setIsLoading(false);
         setStep(2); 
@@ -100,10 +144,32 @@ export default function Lister() {
     }
   };
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
-    if (files.length > 0) {
-      setImageFiles(prev => [...prev, ...files]);
+    if (files.length === 0) return;
+
+    setImageFiles(prev => [...prev, ...files]);
+
+    // If in AI mode and this is the first image and we haven't analyzed yet, analyze it
+    if (mode === 'ai' && files.length > 0 && !formData.title) {
+      const firstImage = files[0];
+      setIsLoading(true);
+      try {
+        console.log('[v0] Analyzing first image with AI...');
+        const aiData = await analyzeVideoWithAI(firstImage);
+        console.log('[v0] Image AI data received:', aiData);
+        setFormData(prev => ({
+          ...prev,
+          ...aiData,
+          sellerName: aiData.sellerName || prev.sellerName,
+          sellerEmail: aiData.sellerEmail || prev.sellerEmail,
+        }));
+      } catch (error) {
+        console.error('[v0] Image analysis error:', error);
+        // Continue without AI analysis
+      } finally {
+        setIsLoading(false);
+      }
     }
   };
 
@@ -607,9 +673,16 @@ export default function Lister() {
 
                 {/* Seller Info */}
                 <div className="space-y-6">
-                  <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
-                    <Icons.User /> Contact Information
-                  </h3>
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+                      <Icons.User /> Contact Information
+                    </h3>
+                    {mode === 'ai' && formData.sellerName && (
+                      <span className="text-xs font-bold px-3 py-1.5 bg-green-100 text-green-700 rounded-full flex items-center gap-1">
+                        ✓ Auto-filled from video
+                      </span>
+                    )}
+                  </div>
                   <div className="grid md:grid-cols-2 gap-6">
                     <div className="group">
                         <input 
