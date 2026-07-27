@@ -304,15 +304,6 @@ export default function Lister() {
                        To fix the TS error strictly without external config changes, we use a standard div with a ref or class.
                    */}
                    <div className="w-full h-full flex items-center justify-center">
-                      <img 
-                        src="https://cdn.lottiefiles.com/animations/1Pqj0W9yGm.json" 
-                        alt="Animation Placeholder" 
-                        className="opacity-0" 
-                        onLoad={(e) => {
-                           // This is a hack to show an image if lottie fails, but ideally you want the script.
-                           // For this code block, we will use a high quality SVG/CSS animation as fallback which is TS safe.
-                        }}
-                      />
                       {/* CSS/SVG Fallback Animation that looks like Lottie */}
                       <svg viewBox="0 0 200 200" className="w-full h-full drop-shadow-2xl animate-float">
                          <defs>
