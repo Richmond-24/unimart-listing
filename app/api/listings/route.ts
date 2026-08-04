@@ -171,220 +171,148 @@ export async function POST(req: NextRequest) {
       console.log('📁 Processing form submission with file uploads...');
       
       const formData = await req.formData();
-      const imageFile = formData.get('image') as File | null;
       
-      if (!imageFile) {
-        return NextResponse.json(
-          { success: false, error: 'No image file provided' },
-          { status: 400 }
-        );
-      }
-
-      // Validate file
-      if (!imageFile.type.startsWith('image/')) {
-        return NextResponse.json(
-          { success: false, error: 'File must be an image' },
-          { status: 400 }
-        );
-      }
-
-      if (imageFile.size > 15 * 1024 * 1024) {
-        return NextResponse.json(
-          { success: false, error: 'Image size must be less than 15MB' },
-          { status: 400 }
-        );
-      }
-
-      // Check API key for AI analysis
-      const apiKey = process.env.OPENROUTER_API_KEY;
-      if (!apiKey) {
-        return NextResponse.json({
-          success: false,
-          error: 'OPENROUTER_API_KEY not configured',
-          message: 'Please add your OpenRouter API key to .env.local file'
-        }, { status: 503 });
-      }
-
-      console.log('🔑 API Key present (first 4 chars):', apiKey.substring(0, 4) + '...');
-
-      // Initialize OpenAI client for AI analysis with timeout
-      const client = new OpenAI({
-        baseURL: "https://openrouter.ai/api/v1",
-        apiKey: apiKey,
-        timeout: 30000, // 30 second timeout
-        maxRetries: 3,
-        defaultHeaders: {
-          "HTTP-Referer": process.env.APP_URL || "http://localhost:3000",
-          "X-Title": "Uni-Mart Lister",
-        },
-      });
-
-      // Convert image to base64
-      const bytes = await imageFile.arrayBuffer();
-      const buffer = Buffer.from(bytes);
-      const base64Image = buffer.toString('base64');
-      const mimeType = imageFile.type;
-      
-      console.log('🖼️ Image converted, size:', buffer.length, 'bytes');
-
-      // AI analysis prompt
-      const prompt = `You are a Jumia product listing assistant. Analyze this product image and extract REAL visible information.
-
-Look ONLY at the image itself. DO NOT use any external knowledge.
-
-Extract these details if VISIBLE in the image and return them as a clean JSON object:
-
-{
-  "detectedCategory": "electronics/fashion/books/home/other",
-  "extractedFields": {
-    "title": "Product name exactly as shown",
-    "brand": "Brand name if visible",
-    "description": "Any visible text or features",
-    "price": 0,
-    "condition": "New/Like New/Good/Fair",
-    "model": "Model number if visible",
-    "storage": "Storage capacity if visible",
-    "ram": "RAM size if visible",
-    "color": "Color if visible",
-    "size": "Size if visible",
-    "material": "Material if visible",
-    "author": "Author if book",
-    "isbn": "ISBN if visible"
-  },
-  "confidence": 0.95
-}
-
-IMPORTANT: Return ONLY the JSON object, no markdown formatting.`;
-
-      console.log('🤖 Calling OpenRouter API with model: qwen/qwen-vl-plus');
-
-      // Use retry logic for the API call
-      const completion = await callWithRetry(async () => {
-        const result = await client.chat.completions.create({
-          model: "qwen/qwen-vl-plus",
-          messages: [
-            {
-              role: "user",
-              content: [
-                {
-                  type: "image_url",
-                  image_url: {
-                    url: `data:${mimeType};base64,${base64Image}`,
-                  },
-                },
-                {
-                  type: "text",
-                  text: prompt,
-                },
-              ],
-            },
-          ],
-          temperature: 0.1,
-          max_tokens: 1500,
-        });
-        return result;
-      });
-
-      console.log('✅ OpenRouter API call successful');
-
-      const content = completion.choices[0]?.message?.content || '{}';
-      console.log('📄 Raw response preview:', content.substring(0, 200) + '...');
-      
-      // Parse the extracted data
-      let extractedData;
-      try {
-        extractedData = parseAIResponse(content);
-        console.log('📊 Parsed data:', JSON.stringify(extractedData, null, 2).substring(0, 200) + '...');
-      } catch (parseError) {
-        console.error('❌ Failed to parse AI response:', parseError);
-        return NextResponse.json({
-          success: false,
-          error: 'AI returned invalid data format',
-          debug: content.substring(0, 200)
-        }, { status: 500 });
-      }
-
-      // Get category template
-      const category = extractedData.detectedCategory || 'other';
-      const categoryTemplate = JUMIA_CATEGORIES[category as keyof typeof JUMIA_CATEGORIES] || JUMIA_CATEGORIES.other;
-
-      // Prepare response for Lister component
-      const response = {
-        success: true,
-        type: 'ai-analysis',
-        listing: {
-          ...extractedData.extractedFields,
-          category: categoryTemplate.name,
-          confidence: extractedData.confidence || 0.7,
-          productType: category,
-        },
-        formTemplate: {
-          category: category,
-          fields: categoryTemplate.fields,
-          subcategories: categoryTemplate.subcategories
-        }
-      };
-
-      return NextResponse.json(response);
-    }
-    
-    // Case 2: Listing Submission - JSON data
-    else if (contentType.includes('application/json')) {
-      console.log('📝 Submitting listing to backend...');
-      
-      const body = await req.json();
+      // Get form fields
+      const title = formData.get('title') as string;
+      const description = formData.get('description') as string;
+      const price = formData.get('price') as string;
+      const category = formData.get('category') as string;
+      const condition = formData.get('condition') as string;
+      const sellerName = formData.get('sellerName') as string;
+      const sellerEmail = formData.get('sellerEmail') as string;
+      const deliveryMethod = formData.get('deliveryMethod') as string;
+      const paymentMethod = formData.get('paymentMethod') as string;
       
       // Validate required fields
-      const required = ['sellerName', 'sellerEmail', 'title', 'description', 'category', 'condition', 'price'];
-      const missing = required.filter(field => !body[field]);
+      if (!title || !description || !price || !category || !sellerName || !sellerEmail) {
+        return NextResponse.json(
+          { success: false, error: 'Missing required fields' },
+          { status: 400 }
+        );
+      }
+
+      // Get all image files
+      const imageFiles = formData.getAll('images') as File[];
+      const videoFile = formData.get('video') as File | null;
       
-      if (missing.length > 0) {
-        return NextResponse.json({
-          success: false,
-          error: `Missing required fields: ${missing.join(', ')}`
-        }, { status: 400 });
+      if (!imageFiles || imageFiles.length === 0) {
+        return NextResponse.json(
+          { success: false, error: 'At least one image is required' },
+          { status: 400 }
+        );
       }
 
-      console.log('📤 Sending to backend:', BACKEND_URL);
+      // Validate image files
+      const uploadedImageUrls: string[] = [];
+      
+      for (const imageFile of imageFiles) {
+        // Validate file type
+        if (!imageFile.type.startsWith('image/')) {
+          return NextResponse.json(
+            { success: false, error: 'All files must be valid images' },
+            { status: 400 }
+          );
+        }
 
-      // Send to Express backend
-      const backendResponse = await fetch(`${BACKEND_URL}/api/listings`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(body),
-      });
-
-      const data = await backendResponse.json();
-
-      if (!backendResponse.ok) {
-        throw new Error(data.error || 'Failed to save listing');
+        // Validate file size (max 10MB per file)
+        if (imageFile.size > 10 * 1024 * 1024) {
+          return NextResponse.json(
+            { success: false, error: 'Image size must be less than 10MB' },
+            { status: 400 }
+          );
+        }
       }
 
-      console.log('✅ Listing saved to backend');
+      // Upload images to Blob (if Blob token is available)
+      const blobToken = process.env.BLOB_READ_WRITE_TOKEN;
+      if (blobToken) {
+        try {
+          for (const imageFile of imageFiles) {
+            const bytes = await imageFile.arrayBuffer();
+            const response = await fetch('https://blob.vercel-storage.com/upload', {
+              method: 'POST',
+              headers: {
+                'Authorization': `Bearer ${blobToken}`,
+              },
+              body: bytes,
+            });
+            
+            if (response.ok) {
+              const data = await response.json();
+              uploadedImageUrls.push(data.url);
+              console.log('✅ Image uploaded to Blob:', data.url);
+            }
+          }
+        } catch (blobError) {
+          console.error('❌ Blob upload error:', blobError);
+          // Continue anyway, we'll still process the listing
+        }
+      }
 
-      // 🔔 Send webhook notification (fire and forget)
-      const sellerData = {
-        sellerName: body.sellerName,
-        sellerEmail: body.sellerEmail,
-        sellerPhone: body.sellerPhone,
-        userType: body.userType || 'student',
-        location: body.location
+      // Upload video to Blob if present
+      let uploadedVideoUrl = '';
+      if (videoFile && blobToken) {
+        try {
+          if (videoFile.type.startsWith('video/') && videoFile.size <= 100 * 1024 * 1024) {
+            const videoBytes = await videoFile.arrayBuffer();
+            const videoResponse = await fetch('https://blob.vercel-storage.com/upload', {
+              method: 'POST',
+              headers: {
+                'Authorization': `Bearer ${blobToken}`,
+              },
+              body: videoBytes,
+            });
+            
+            if (videoResponse.ok) {
+              const videoData = await videoResponse.json();
+              uploadedVideoUrl = videoData.url;
+              console.log('✅ Video uploaded to Blob:', videoData.url);
+            }
+          }
+        } catch (videoError) {
+          console.error('❌ Video upload error:', videoError);
+        }
+      }
+
+      // Send webhook notification
+      const listingData = {
+        title,
+        description,
+        price: parseFloat(price),
+        category,
+        condition,
+        deliveryMethod,
+        paymentMethod,
+        imageUrls: uploadedImageUrls,
+        videoUrl: uploadedVideoUrl || undefined,
       };
-      
-      // Don't await - let it run in background
-      sendWebhookNotification(body, sellerData);
 
+      const sellerData = {
+        sellerName,
+        sellerEmail,
+      };
+
+      // Send notification via webhook
+      const webhookResult = await sendWebhookNotification(listingData, sellerData);
+      
+      if (!webhookResult.success) {
+        console.warn('⚠️ Webhook notification failed:', webhookResult.error);
+        // Don't fail the listing just because webhook failed
+      }
+
+      // Return success response with listing data
       return NextResponse.json({
         success: true,
-        type: 'submission',
-        data: data.data || data,
-        message: 'Listing saved successfully. A confirmation email will be sent shortly.'
-      });
-    }
-    
-    else {
+        message: 'Listing created successfully',
+        listing: {
+          title,
+          price,
+          category,
+          imageUrls: uploadedImageUrls,
+        },
+      }, { status: 201 });
+      
+    } else {
       return NextResponse.json(
         { success: false, error: 'Unsupported content type' },
         { status: 400 }
