@@ -161,14 +161,14 @@ async function sendWebhookNotification(listingData: any, sellerData: any) {
   }
 }
 
-// Handle AI analysis (POST with image) and listing submission (POST with JSON)
+// Handle listing submission with file uploads to Blob
 export async function POST(req: NextRequest) {
   try {
     const contentType = req.headers.get('content-type') || '';
     
-    // Case 1: AI Analysis - FormData with image
+    // Handle FormData with file uploads (new single-form submission)
     if (contentType.includes('multipart/form-data')) {
-      console.log('📸 Processing image for AI analysis...');
+      console.log('📁 Processing form submission with file uploads...');
       
       const formData = await req.formData();
       const imageFile = formData.get('image') as File | null;
